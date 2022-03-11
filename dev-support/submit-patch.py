@@ -127,9 +127,9 @@ def get_base_branch():
 # specified, patch is name (branch name).patch.
 def get_patch_name(branch):
     if args.jira_id is None:
-        return branch + ".patch"
+        return f'{branch}.patch'
 
-    patch_name_prefix = args.jira_id.upper() + "." + branch
+    patch_name_prefix = f'{args.jira_id.upper()}.{branch}'
     return get_patch_name_with_version(patch_name_prefix)
 
 
@@ -138,7 +138,7 @@ def get_patch_name(branch):
 def get_patch_name_with_version(patch_name_prefix):
     # JIRA's rest api is broken wrt to attachments. https://jira.atlassian.com/browse/JRA-27637.
     # Using crude way to get list of attachments.
-    url = "https://issues.apache.org/jira/browse/" + args.jira_id
+    url = f"https://issues.apache.org/jira/browse/{args.jira_id}"
     logger.info("Getting list of attachments for jira %s from %s", args.jira_id, url)
     html = requests.get(url)
     if html.status_code == 404:
@@ -148,7 +148,7 @@ def get_patch_name_with_version(patch_name_prefix):
     # Iterate over patch names starting from version 1 and return when name is not already used.
     content = unicode(html.content, 'utf-8')
     for i in range(1, 1000):
-        name = patch_name_prefix + "." + ('{0:03d}'.format(i)) + ".patch"
+        name = f'{patch_name_prefix}.' + ('{0:03d}'.format(i)) + ".patch"
         if name not in content:
             return name
 
@@ -159,11 +159,9 @@ def validate_patch_dir(patch_dir):
     if not os.path.exists(patch_dir):
         logger.warn(" Patch directory doesn't exist. Creating it.")
         os.mkdir(patch_dir)
-    else:
-        # If patch_dir exists, make sure it's a directory.
-        if not os.path.isdir(patch_dir):
-            log_fatal_and_exit(" '%s' exists but is not a directory. Specify another directory.",
-                               patch_dir)
+    elif not os.path.isdir(patch_dir):
+        log_fatal_and_exit(" '%s' exists but is not a directory. Specify another directory.",
+                           patch_dir)
 
 
 # Make sure current branch is ahead of base_branch by exactly 1 commit. Quits if
@@ -171,8 +169,8 @@ def validate_patch_dir(patch_dir):
 # - current branch is same as base branch
 # - current branch is ahead of base_branch by more than 1 commits
 def check_diff_between_branches(base_branch):
-    only_in_base_branch = git.log("HEAD.." + base_branch, oneline = True)
-    only_in_active_branch = git.log(base_branch + "..HEAD", oneline = True)
+    only_in_base_branch = git.log(f"HEAD..{base_branch}", oneline = True)
+    only_in_active_branch = git.log(f'{base_branch}..HEAD', oneline = True)
     if len(only_in_base_branch) != 0:
         log_fatal_and_exit(" '%s' is ahead of current branch by %s commits. Rebase "
                            "and try again.", base_branch, len(only_in_base_branch.split("\n")))
@@ -186,7 +184,7 @@ def check_diff_between_branches(base_branch):
 
 # If ~/.apache-creds is present, load credentials from it otherwise prompt user.
 def get_credentials():
-    creds = dict()
+    creds = {}
     creds_filepath = os.path.expanduser("~/.apache-creds")
     if os.path.exists(creds_filepath):
         try:
@@ -210,19 +208,19 @@ def attach_patch_to_jira(issue_url, patch_filepath, creds):
     headers = {'X-Atlassian-Token': 'no-check'}
     files = {'file': open(patch_filepath, 'rb')}
     jira_auth = requests.auth.HTTPBasicAuth(creds['jira_username'], creds['jira_password'])
-    attachment_url = issue_url +  "/attachments"
+    attachment_url = f'{issue_url}/attachments'
     r = requests.post(attachment_url, headers = headers, files = files, auth = jira_auth)
     assert_status_code(r, 200, "uploading patch to jira")
 
 
 def get_jira_summary(issue_url):
-    r = requests.get(issue_url + "?fields=summary")
+    r = requests.get(f'{issue_url}?fields=summary')
     assert_status_code(r, 200, "fetching jira summary")
     return json.loads(r.content)["fields"]["summary"]
 
 
 def get_review_board_id_if_present(issue_url, rb_link_title):
-    r = requests.get(issue_url + "/remotelink")
+    r = requests.get(f'{issue_url}/remotelink')
     assert_status_code(r, 200, "fetching remote links")
     links = json.loads(r.content)
     for link in links:
@@ -261,7 +259,7 @@ if args.jira_id is not None:
     if not args.skip_review_board:
         rb_auth = requests.auth.HTTPBasicAuth(creds['rb_username'], creds['rb_password'])
 
-        rb_link_title = "Review Board (" + base_branch_without_remote + ")"
+        rb_link_title = f"Review Board ({base_branch_without_remote})"
         rb_id = get_review_board_id_if_present(issue_url, rb_link_title)
 
         # If no review board link found, create new review request and add its link to jira.
@@ -297,12 +295,17 @@ if args.jira_id is not None:
             # Add link to review board in the jira.
             remote_link = json.dumps({'object': {'url': absolute_url, 'title': rb_link_title}})
             jira_auth = requests.auth.HTTPBasicAuth(creds['jira_username'], creds['jira_password'])
-            r = requests.post(issue_url + "/remotelink", data = remote_link, auth = jira_auth,
-                              headers={'Content-Type':'application/json'})
+            r = requests.post(
+                f'{issue_url}/remotelink',
+                data=remote_link,
+                auth=jira_auth,
+                headers={'Content-Type': 'application/json'},
+            )
+
         else:
             logger.info(" Updating existing review board: https://reviews.apache.org/r/%s", rb_id)
             draft_url = "https://reviews.apache.org/api/review-requests/" + rb_id + "/draft/"
-            diff_url = draft_url + "diffs/"
+            diff_url = f'{draft_url}diffs/'
             files = {'path' : (patch_filename, open(patch_filepath, 'rb'))}
             r = requests.post(diff_url, files = files, auth = rb_auth)
             assert_status_code(r, 201, "uploading diff to review draft")

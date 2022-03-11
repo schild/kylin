@@ -39,7 +39,7 @@ def default_config(cube_name):
                                 end_time="1388534400000",
                                 cube_name=cube_name)
     job_id = resp['uuid']
-    step_id = job_id + "-01"
+    step_id = f'{job_id}-01'
     client.await_job(job_id)
     resp = client.get_step_output(job_id=job_id, step_id=step_id)
     output = resp.get('cmd_output')
@@ -65,7 +65,7 @@ def user_def_config(cube_name):
                                 cube_name=cube_name)
 
     job_id = resp['uuid']
-    step_id = job_id + "-01"
+    step_id = f'{job_id}-01'
     client.await_job(job_id)
     resp = client.get_step_output(job_id=job_id, step_id=step_id)
     output = resp.get('cmd_output')
@@ -91,7 +91,7 @@ def user_defined_no_dist(cube_name, cube_no_distinct):
                                 cube_name=cube_name)
 
     job_id = resp['uuid']
-    step_id = job_id + "-01"
+    step_id = f'{job_id}-01'
     client.await_job(job_id)
     resp = client.get_step_output(job_id=job_id, step_id=step_id)
     output = resp.get('cmd_output')
@@ -115,7 +115,7 @@ def user_defined_no_dist(cube_name, cube_no_distinct):
                                 cube_name=cube_no_distinct)
 
     job_id = resp['uuid']
-    step_id = job_id + "-01"
+    step_id = f'{job_id}-01'
     client.await_job(job_id)
     resp = client.get_step_output(job_id=job_id, step_id=step_id)
     output = resp.get('cmd_output')
@@ -146,7 +146,7 @@ def override_on_cube(cube_override_conf):
                                 cube_name=cube_override_conf)
 
     job_id = resp['uuid']
-    step_id = job_id + "-01"
+    step_id = f'{job_id}-01'
     client.await_job(job_id)
     resp = client.get_step_output(job_id=job_id, step_id=step_id)
     output = resp.get('cmd_output')

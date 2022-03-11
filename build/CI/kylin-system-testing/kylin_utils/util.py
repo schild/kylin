@@ -74,11 +74,8 @@ def if_cube_exists(kylin_client, cube_name, project=None):
 
 
 def if_model_exists(kylin_client, model_name, project):
-    exists = 0
     resp = kylin_client.list_model_desc(project_name=project, model_name=model_name)
-    if len(resp) == 1:
-        exists = 1
-    return exists
+    return 1 if len(resp) == 1 else 0
 
 def ssh_shell(config_file='kylin_host.yml'):
     instances_file = os.path.join('kylin_instances/', config_file)
