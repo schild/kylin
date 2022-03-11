@@ -32,8 +32,8 @@ def check_model_clone(project_name, model_name, clone_name):
     model_desc = client.list_model_desc(project_name, model_name)
     clone_model_desc = client.list_model_desc(project_name, clone_name)
     check_list = ['fact_table', 'lookups', 'dimensions', 'metrics', 'filter_condition', 'partition_desc']
-    for i in range(len(check_list)):
-        assert model_desc[0][check_list[i]] == clone_model_desc[0][check_list[i]]
+    for check in check_list:
+        assert model_desc[0][check] == clone_model_desc[0][check]
 
 
 @step("again, in project <project_name>, clone model <model_name> and name it <clone_name>")

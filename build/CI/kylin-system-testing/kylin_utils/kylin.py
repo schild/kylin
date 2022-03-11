@@ -55,8 +55,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
 
     def list_projects(self, limit=100, offset=0):
         params = {'limit': limit, 'offset': offset}
-        resp = self._request('GET', '/projects', params=params)
-        return resp
+        return self._request('GET', '/projects', params=params)
 
     def create_project(self, project_name, description=None, override_kylin_properties=None):
         data = {'name': project_name,
@@ -66,8 +65,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
         payload = {
             'projectDescData': json.dumps(data),
         }
-        resp = self._request('POST', '/projects', json=payload)
-        return resp
+        return self._request('POST', '/projects', json=payload)
 
     def update_project(self, project_name, description=None, override_kylin_properties=None):
         """
@@ -84,8 +82,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'formerProjectName': project_name,
             'projectDescData': json.dumps(data),
         }
-        resp = self._request('PUT', '/projects', json=payload)
-        return resp
+        return self._request('PUT', '/projects', json=payload)
 
     def delete_project(self, project_name, force=False):
         """
@@ -109,8 +106,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
                     self.delete_model(model['name'])
                 models = self.list_model_desc(project_name)
         url = '/projects/{project}'.format(project=project_name)
-        resp = self._request('DELETE', url)
-        return resp
+        return self._request('DELETE', url)
 
     def load_table(self, project_name, tables, calculate=False):
         """
@@ -125,13 +121,11 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
         url = '/tables/{tables}/{project}/'.format(tables=tables, project=project_name)
         payload = {'calculate': calculate
                    }
-        resp = self._request('POST', url, json=payload)
-        return resp
+        return self._request('POST', url, json=payload)
 
     def unload_table(self, project_name, tables):
         url = '/tables/{tables}/{project}'.format(tables=tables, project=project_name)
-        resp = self._request('DELETE', url)
-        return resp
+        return self._request('DELETE', url)
 
     def list_hive_tables(self, project_name, extension=False, user_session=False):
         """
@@ -142,8 +136,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
         """
         url = '/tables'
         params = {'project': project_name, 'ext': extension}
-        resp = self._request('GET', url, params=params, inner_session=user_session)
-        return resp
+        return self._request('GET', url, params=params, inner_session=user_session)
 
     def get_table_info(self, project_name, table_name):
         """
@@ -152,19 +145,16 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
         :return: hive table information
         """
         url = '/tables/{project}/{table}'.format(project=project_name, table=table_name)
-        resp = self._request('GET', url)
-        return resp
+        return self._request('GET', url)
 
     def get_tables_info(self, project_name, ext='true'):
         url = '/tables'
         params = {'project': project_name, 'ext': ext}
-        resp = self._request('GET', url, params=params)
-        return resp
+        return self._request('GET', url, params=params)
 
     def get_table_streaming_config(self, project_name, table_name, limit=100, offset=0):
         params = {'table': table_name, 'project': project_name, 'limit': limit, 'offset': offset}
-        resp = self._request('GET', '/streaming/getConfig', params=params)
-        return resp
+        return self._request('GET', '/streaming/getConfig', params=params)
 
     def load_kafka_table(self, project_name, kafka_config, streaming_config, table_data, message=None):
         url = '/streaming'
@@ -173,8 +163,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
                    'streamingConfig': json.dumps(streaming_config),
                    'tableData': json.dumps(table_data),
                    'message': message}
-        resp = self._request('POST', url, json=payload)
-        return resp
+        return self._request('POST', url, json=payload)
 
     def update_kafka_table(self, project_name, kafka_config, streaming_config, table_data, cluster_index=0):
         url = '/streaming'
@@ -183,8 +172,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
                    'streamingConfig': streaming_config,
                    'tableData': table_data,
                    'clusterIndex': cluster_index}
-        resp = self._request('PUT', url, json=payload)
-        return resp
+        return self._request('PUT', url, json=payload)
 
     def list_model_desc(self, project_name=None, model_name=None, limit=100, offset=0):
 
@@ -200,8 +188,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
                   'modelName': model_name,
                   'projectName': project_name
                   }
-        resp = self._request('GET', '/models', params=params)
-        return resp
+        return self._request('GET', '/models', params=params)
 
     def create_model(self, project_name, model_name, model_desc_data, user_session=False):
         url = '/models'
@@ -211,8 +198,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'modelDescData': json.dumps(model_desc_data)
         }
         logging.debug("Current payload for creating model is %s", payload)
-        resp = self._request('POST', url, json=payload, inner_session=user_session)
-        return resp
+        return self._request('POST', url, json=payload, inner_session=user_session)
 
     def update_model(self, project_name, model_name, model_desc_data, user_session=False):
         url = '/models'
@@ -221,14 +207,12 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'model': model_name,
             'modelDescData': json.dumps(model_desc_data)
         }
-        resp = self._request('PUT', url, json=payload, inner_session=user_session)
-        return resp
+        return self._request('PUT', url, json=payload, inner_session=user_session)
 
     def clone_model(self, project_name, model_name, new_model_name):
         url = '/models/{model}/clone'.format(model=model_name)
         payload = {'modelName': new_model_name, 'project': project_name}
-        resp = self._request('PUT', url, json=payload)
-        return resp
+        return self._request('PUT', url, json=payload)
 
     def delete_model(self, model_name):
         url = '/models/{model}'.format(model=model_name)
@@ -237,19 +221,18 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
 
     def get_cube_desc(self, cube_name):
         url = '/cube_desc/{cube}'.format(cube=cube_name)
-        resp = self._request('GET', url)
-        return resp
+        return self._request('GET', url)
 
     def list_cubes(self, project=None, offset=0, limit=10000, cube_name=None, model_name=None, user_session=False):
         params = {'projectName': project, 'offset': offset, 'limit': limit,
                   'cubeName': cube_name, 'modelName': model_name}
-        resp = self._request('GET', '/cubes/', params=params, inner_session=user_session)
-        return resp
+        return self._request(
+            'GET', '/cubes/', params=params, inner_session=user_session
+        )
 
     def get_cube_instance(self, cube_name):
         url = '/cubes/{cube}'.format(cube=cube_name)
-        resp = self._request('GET', url)
-        return resp
+        return self._request('GET', url)
 
     def create_cube(self, project_name, cube_name, cube_desc_data, user_session=False):
         # workaround of #15337
@@ -260,8 +243,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'cubeName': cube_name,
             'cubeDescData': json.dumps(cube_desc_data)
         }
-        resp = self._request('POST', url, json=payload, inner_session=user_session)
-        return resp
+        return self._request('POST', url, json=payload, inner_session=user_session)
 
     def update_cube(self, project_name, cube_name, cube_desc_data, user_session=False):
         # workaround of #15337
@@ -272,13 +254,11 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'cubeName': cube_name,
             'cubeDescData': json.dumps(cube_desc_data)
         }
-        resp = self._request('PUT', url, json=payload, inner_session=user_session)
-        return resp
+        return self._request('PUT', url, json=payload, inner_session=user_session)
 
     def update_cube_engine(self, cube_name, engine_type):
         url = '/cubes/{cube}/engine/{engine}'.format(cube=cube_name, engine=engine_type)
-        resp = self._request('PUT', url)
-        return resp
+        return self._request('PUT', url)
 
     def build_segment(self, cube_name, start_time, end_time, force=False):
         """
@@ -296,8 +276,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'endTime': end_time,
             'force': force
         }
-        resp = self._request('PUT', url, json=payload)
-        return resp
+        return self._request('PUT', url, json=payload)
 
     def full_build_cube(self, cube_name, force=False):
         """
@@ -323,8 +302,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'endTime': end_time,
             'force': force
         }
-        resp = self._request('PUT', url, json=payload)
-        return resp
+        return self._request('PUT', url, json=payload)
 
     def refresh_segment(self, cube_name, start_time, end_time, force=True):
         """
@@ -342,13 +320,11 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'endTime': end_time,
             'force': force
         }
-        resp = self._request('PUT', url, json=payload)
-        return resp
+        return self._request('PUT', url, json=payload)
 
     def delete_segments(self, cube_name, segment_name):
         url = '/cubes/{cube}/segs/{segment}'.format(cube=cube_name, segment=segment_name)
-        resp = self._request('DELETE', url)
-        return resp
+        return self._request('DELETE', url)
 
     def build_streaming_cube(self, project_name, cube_name, source_offset_start=0,
                              source_offset_end='9223372036854775807'):
@@ -368,8 +344,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'sourceOffsetStart': source_offset_start,
             'sourceOffsetEnd': source_offset_end,
         }
-        resp = self._request('PUT', url, json=payload)
-        return resp
+        return self._request('PUT', url, json=payload)
 
     def build_cube_customized(self, cube_name, source_offset_start, source_offset_end=None, mp_values=None,
                               force=False):
@@ -389,8 +364,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'mpValues': mp_values,
             'force': force
         }
-        resp = self._request('PUT', url, json=payload)
-        return resp
+        return self._request('PUT', url, json=payload)
 
     def clone_cube(self, project_name, cube_name, new_cube_name):
         """
@@ -404,23 +378,19 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'cubeName': new_cube_name,
             'project': project_name
         }
-        resp = self._request('PUT', url, json=payload)
-        return resp
+        return self._request('PUT', url, json=payload)
 
     def enable_cube(self, cube_name):
         url = '/cubes/{cube}/enable'.format(cube=cube_name)
-        resp = self._request('PUT', url)
-        return resp
+        return self._request('PUT', url)
 
     def disable_cube(self, cube_name):
         url = '/cubes/{cube}/disable'.format(cube=cube_name)
-        resp = self._request('PUT', url)
-        return resp
+        return self._request('PUT', url)
 
     def purge_cube(self, cube_name):
         url = '/cubes/{cube}/purge'.format(cube=cube_name)
-        resp = self._request('PUT', url)
-        return resp
+        return self._request('PUT', url)
 
     def delete_cube(self, cube_name):
         url = '/cubes/{cube}'.format(cube=cube_name)
@@ -433,8 +403,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
         :return:
         """
         url = '/cubes/{cube}/holes'.format(cube=cube_name)
-        resp = self._request('GET', url)
-        return resp
+        return self._request('GET', url)
 
     def fill_holes(self, cube_name):
         """
@@ -445,13 +414,11 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
         :return:
         """
         url = '/cubes/{cube}/holes'.format(cube=cube_name)
-        resp = self._request('PUT', url)
-        return resp
+        return self._request('PUT', url)
 
     def export_cuboids(self, cube_name):
         url = '/cubes/{cube}/cuboids/export'.fomat(cube=cube_name)
-        resp = self._request('PUT', url)
-        return resp
+        return self._request('PUT', url)
 
     def refresh_lookup(self, cube_name, lookup_table):
         """
@@ -465,46 +432,38 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'cubeName': cube_name,
             'lookupTableName': lookup_table
         }
-        resp = self._request('PUT', url, json=payload)
-        return resp
+        return self._request('PUT', url, json=payload)
 
     def get_job_info(self, job_id):
         url = '/jobs/{job_id}'.format(job_id=job_id)
-        resp = self._request('GET', url)
-        return resp
+        return self._request('GET', url)
 
     def get_job_status(self, job_id):
         return self.get_job_info(job_id)['job_status']
 
     def get_step_output(self, job_id, step_id):
         url = '/jobs/{jobId}/steps/{stepId}/output'.format(jobId=job_id, stepId=step_id)
-        resp = self._request('GET', url)
-        return resp
+        return self._request('GET', url)
 
     def pause_job(self, job_id):
         url = '/jobs/{jobId}/pause'.format(jobId=job_id)
-        resp = self._request('PUT', url)
-        return resp
+        return self._request('PUT', url)
 
     def resume_job(self, job_id):
         url = '/jobs/{jobId}/resume'.format(jobId=job_id)
-        resp = self._request('PUT', url)
-        return resp
+        return self._request('PUT', url)
 
     def discard_job(self, job_id):
         url = '/jobs/{jobId}/cancel'.format(jobId=job_id)
-        resp = self._request('PUT', url)
-        return resp
+        return self._request('PUT', url)
 
     def delete_job(self, job_id):
         url = '/jobs/{jobId}/drop'.format(jobId=job_id)
-        resp = self._request('DELETE', url)
-        return resp
+        return self._request('DELETE', url)
 
     def resubmit_job(self, job_id):
         url = '/jobs/{jobId}/resubmit'.format(jobId=job_id)
-        resp = self._request('PUT', url)
-        return resp
+        return self._request('PUT', url)
 
     def list_jobs(self, project_name, status=None, offset=0, limit=10000, time_filter=1, job_search_mode='ALL'):
         """
@@ -528,8 +487,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'timeFilter': time_filter,
             'jobSearchMode': job_search_mode
         }
-        resp = self._request('GET', url, params=params)
-        return resp
+        return self._request('GET', url, params=params)
 
     def await_all_jobs(self, project_name, waiting_time=30):
         """
@@ -648,8 +606,9 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             backdoortoggles = {"backdoorToggles": {"DEBUG_TOGGLE_HIT_CUBE": cube_name}}
         if backdoortoggles:
             payload.update(backdoortoggles)
-        resp = self._request('POST', url, json=payload, inner_session=user_session, timeout=timeout)
-        return resp
+        return self._request(
+            'POST', url, json=payload, inner_session=user_session, timeout=timeout
+        )
 
     def save_query(self, sql_name, project_name, sql, description=None):
         url = '/saved_queries'
@@ -666,8 +625,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
         params = {
             'project': project_name
         }
-        response = self._request('GET', url, params=params, inner_session=user_session)
-        return response
+        return self._request('GET', url, params=params, inner_session=user_session)
 
     def remove_query(self, sql_id):
         url = '/saved_queries/{id}'.format(id=sql_id)
@@ -676,8 +634,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
     def list_queryable_tables(self, project_name):
         url = '/tables_and_columns'
         params = {'project': project_name}
-        resp = self._request('GET', url, params=params)
-        return resp
+        return self._request('GET', url, params=params)
 
     def get_all_system_prop(self, server=None):
         url = '/admin/config'
@@ -710,8 +667,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'authorities': authorities,
             'disabled': disabled,
         }
-        resp = self._request('POST', url, json=payload, inner_session=user_session)
-        return resp
+        return self._request('POST', url, json=payload, inner_session=user_session)
 
     def delete_user(self, user_name, user_session=False):
         """
@@ -721,8 +677,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
         :return:
         """
         url = '/user/{username}'.format(username=user_name)
-        resp = self._request('DELETE', url, inner_session=user_session)
-        return resp
+        return self._request('DELETE', url, inner_session=user_session)
 
     def update_user(self, user_name, authorities, password=None, disabled=False,
                     user_session=False, payload_user_name=None):
@@ -744,8 +699,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'authorities': authorities,
             'disabled': disabled,
         }
-        resp = self._request('PUT', url, json=payload, inner_session=user_session)
-        return resp
+        return self._request('PUT', url, json=payload, inner_session=user_session)
 
     def update_user_password(self, user_name, new_password, password=None, user_session=False):
         """
@@ -762,8 +716,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'password': password,
             'newPassword': new_password
         }
-        resp = self._request('PUT', url, json=payload, inner_session=user_session)
-        return resp
+        return self._request('PUT', url, json=payload, inner_session=user_session)
 
     def list_users(self, project_name=None, group_name=None, is_fuzz_match=False, name=None, offset=0, limit=10000
                    , user_session=False):
@@ -787,8 +740,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
             'isFuzzMatch': is_fuzz_match,
             'name': name
         }
-        resp = self._request('GET', url, params=params, inner_session=user_session)
-        return resp
+        return self._request('GET', url, params=params, inner_session=user_session)
 
     def list_user_authorities(self, project_name, user_session=False):
         """
@@ -801,8 +753,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
         params = {
             'project': project_name
         }
-        resp = self._request('GET', url, params=params, inner_session=user_session)
-        return resp
+        return self._request('GET', url, params=params, inner_session=user_session)
 
     def create_group(self, group_name, user_session=False):
         """
@@ -812,8 +763,7 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
         :return:
         """
         url = '/user_group/{group_name}'.format(group_name=group_name)
-        resp = self._request('POST', url, inner_session=user_session)
-        return resp
+        return self._request('POST', url, inner_session=user_session)
 
     def delete_group(self, group_name, user_session=False):
         """
@@ -823,14 +773,12 @@ class KylinHttpClient(BasicHttpClient):  # pylint: disable=too-many-public-metho
         :return:
         """
         url = '/user_group/{group_name}'.format(group_name=group_name)
-        resp = self._request('DELETE', url, inner_session=user_session)
-        return resp
+        return self._request('DELETE', url, inner_session=user_session)
 
     def add_or_del_users(self, group_name, users):
         url = '/user_group/users/{group}'.format(group=group_name)
         payload = {'users': users}
-        resp = self._request('POST', url, json=payload)
-        return resp
+        return self._request('POST', url, json=payload)
 
     def _request(self, method, url, **kwargs):  # pylint: disable=arguments-differ
         return super()._request(method, self._base_url + url, **kwargs)

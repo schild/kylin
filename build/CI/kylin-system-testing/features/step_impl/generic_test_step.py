@@ -100,7 +100,7 @@ def query_cube_step(sql, cube_name, project, result):
                                 sql=sql)
     assert resp.get('isException') is False
     assert resp.get('results')[0][0] == result
-    assert resp.get('cube') == 'CUBE[name=' + cube_name + ']'
+    assert resp.get('cube') == f'CUBE[name={cube_name}]'
     assert resp.get('pushDown') is False
 
 

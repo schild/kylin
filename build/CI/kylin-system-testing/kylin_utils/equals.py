@@ -92,7 +92,7 @@ def _is_family(datatype1, datatype2):
 
 class _Row(tuple):
 
-    def __init__(self, values, types, type_nums):  # pylint: disable=unused-argument
+    def __init__(self, values, types, type_nums):    # pylint: disable=unused-argument
         """
         :param values: results of query response
         :param types: columnTypeName of query response
@@ -105,10 +105,9 @@ class _Row(tuple):
         self._types = types
         self._type_nums = type_nums
 
-        self._has_fraction = False
-        for datatype in self._types:
-            if datatype in FRACTION_FAMILY:
-                self._has_fraction = True
+        self._has_fraction = any(
+            datatype in FRACTION_FAMILY for datatype in self._types
+        )
 
     def __new__(cls, values, types, type_nums):  # pylint: disable=unused-argument
         return tuple.__new__(cls, values)
@@ -149,9 +148,8 @@ class _Row(tuple):
                 if abs(rate) > 0.01:
                     return False
 
-            else:
-                if svalue != ovalue:
-                    return False
+            elif svalue != ovalue:
+                return False
 
         return True
 
@@ -205,18 +203,17 @@ def dataset_equals(expect, actual, expect_col_types=None, actual_col_types=None,
 
     if expect_col_types is None:
         expect_col_types = ['VARCHAR'] * len(expect[0])
-    expect_set = set()
-    for values in expect:
-        expect_set.add(_Row(values, expect_col_types, expect_col_nums))
+    expect_set = {
+        _Row(values, expect_col_types, expect_col_nums) for values in expect
+    }
 
     if actual_col_types is None:
-        actual_col_types = expect_col_types if expect_col_types else ['VARCHAR'] * len(actual[0])
-    actual_set = set()
-    for values in actual:
-        actual_set.add(_Row(values, actual_col_types, actual_col_nums))
+        actual_col_types = expect_col_types or ['VARCHAR'] * len(actual[0])
+    actual_set = {
+        _Row(values, actual_col_types, actual_col_nums) for values in actual
+    }
 
-    assert_result = expect_set ^ actual_set
-    if assert_result:
+    if assert_result := expect_set ^ actual_set:
         logging.error('diff[%s]', len(assert_result))
         print(assert_result)
         Messages.write_message("\nDiff {0}".format(assert_result))
